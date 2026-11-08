@@ -13,7 +13,10 @@ enum Launcher {
     static func makeProcess(args: [String]) -> Process {
         let d = UserDefaults.standard
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: d.string(forKey: Prefs.pythonPath) ?? "")
+        // the stored Python can be gone (Homebrew moves it on every upgrade): then use the one found now
+        var python = d.string(forKey: Prefs.pythonPath) ?? ""
+        if !FileManager.default.isExecutableFile(atPath: python) { python = Prefs.detectPython() }
+        process.executableURL = URL(fileURLWithPath: python)
         process.arguments = ["-W", "ignore", "-c", "import sys; from icloudpd.cli import cli; sys.exit(cli())"] + args
         var env = ProcessInfo.processInfo.environment
         if let src = d.string(forKey: Prefs.sourcePath), !src.isEmpty { env["PYTHONPATH"] = src }
