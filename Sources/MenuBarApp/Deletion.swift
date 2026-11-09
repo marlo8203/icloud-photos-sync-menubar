@@ -22,7 +22,8 @@ enum Deletion {
         if dryRun { args.append("--dry-run") }
         appendAudit(mode: dryRun ? "DRY-RUN" : "DELETE", items: items)
         let (code, text) = await Launcher.runOnce(args: args)
-        return (code == 0, text + (code == 0 ? "" : "\n(exit code \(code))"))
+        let ok = deleteListSucceeded(exitCode: code, output: text)
+        return (ok, text + (ok ? "" : "\n(exit code \(code))"))
     }
 
     /// Local files of photos that were deleted in iCloud. icloudpd's own auto-delete finds them (it knows the
